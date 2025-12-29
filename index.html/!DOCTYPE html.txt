@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background: linear-gradient(135deg, #4CAF50, #2e7d32);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    nav {
+      background: #222;
+      padding: 12px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover { text-decoration: underline; }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover { background: #43a047; }
+
+    .story {
+      margin-top: 15px;
+    }
+
+    .story h3 { margin-bottom: 5px; }
+    .story small { color: #666; }
+
+    .actions {
+      margin-top: 10px;
+    }
+
+    .actions button {
+      background: #eee;
+      color: #333;
+      margin-right: 10px;
+    }
+
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📖 Story Hub</h1>
+  <p>A place where anyone can share their stories</p>
+</header>
+
+<nav>
+  <a href="#publish">Publish</a>
+  <a href="#stories">Stories</a>
+</nav>
+
+<main>
+
+  <section class="card" id="publish">
+    <h2>✍️ Publish a Story</h2>
+    <input type="text" id="author" placeholder="Your name" />
+    <input type="text" id="title" placeholder="Story title" />
+    <textarea id="content" rows="6" placeholder="Write your story here..."></textarea>
+    <button onclick="publishStory()">Publish Story</button>
+  </section>
+
+  <section id="stories">
+    <h2>📚 Published Stories</h2>
+    <div id="storyList"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2025 Story Hub · Built with HTML, CSS & JavaScript</p>
+</footer>
+
+<script>
+  let stories = JSON.parse(localStorage.getItem('stories')) || [];
+
+  function saveStories() {
+    localStorage.setItem('stories', JSON.stringify(stories));
+  }
+
+  function publishStory() {
+    const author = document.getElementById('author').value.trim();
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+
+    if (!author || !title || !content) {
+      alert('Please fill out all fields.');
+      return;
+    }
+
+    const story = {
+      id: Date.now(),
+      author,
+      title,
+      content,
+      likes: 0,
+      date: new Date().toLocaleString()
+    };
+
+    stories.unshift(story);
+    saveStories();
+    renderStories();
+
+    document.getElementById('author').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('content').value = '';
+  }
+
+  function likeStory(id) {
+    const story = stories.find(s => s.id === id);
+    story.likes++;
+    saveStories();
+    renderStories();
+  }
+
+  function deleteStory(id) {
+    if (!confirm('Delete this story?')) return;
+    stories = stories.filter(s => s.id !== id);
+    saveStories();
+    renderStories();
+  }
+
+  function renderStories() {
+    const list = document.getElementById('storyList');
+    list.innerHTML = '';
+
+    if (stories.length === 0) {
+      list.innerHTML = '<p>No stories yet. Be the first to publish!</p>';
+      return;
+    }
+
+    stories.forEach(story => {
+      const div = document.createElement('div');
+      div.className = 'card story';
+      div.innerHTML = `
+        <h3>${story.title}</h3>
+        <small>by ${story.author} · ${story.date}</small>
+        <p>${story.content}</p>
+        <div class="actions">
+          <button onclick="likeStory(${story.id})">❤️ ${story.likes}</button>
+          <button onclick="deleteStory(${story.id})">🗑️ Delete</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  renderStories();
+</script>
+
+</body>
+</html>
